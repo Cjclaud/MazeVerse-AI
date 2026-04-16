@@ -1,0 +1,101 @@
+{
+    "1": {
+        "completed": true,
+        "best_score": 77,
+        "best_ai_score": 79,
+        "best_time": 13,
+        "items_used": [
+            "None"
+        ]
+    },
+    "2": {
+        "completed": true,
+        "best_score": 82,
+        "best_ai_score": 95,
+        "best_time": 9,
+        "items_used": [
+            "None"
+        ]
+    },
+    "3": {
+        "completed": true,
+        "best_score": 95,
+        "best_ai_score": 96,
+        "best_time": 9,
+        "items_used": [
+            "None"
+        ]
+    },
+    "4": {
+        "completed": true,
+        "best_score": 110,
+        "best_ai_score": 96,
+        "best_time": 11,
+        "items_used": [
+            "None"
+        ]
+    },
+    "5": {
+        "completed": true,
+        "best_score": 121,
+        "best_ai_score": 76,
+        "best_time": 12,
+        "items_used": [
+            "None"
+        ]
+    },
+    "6": {
+        "completed": true,
+        "best_score": 148,
+        "best_ai_score": 93,
+        "best_time": 13,
+        "items_used": [
+            "None"
+        ]
+    },
+    "7": {
+        "completed": true,
+        "best_score": 151,
+        "best_ai_score": 92,
+        "best_time": 12,
+        "items_used": [
+            "None"
+        ]
+    },
+    "8": {
+        "completed": true,
+        "best_score": 166,
+        "best_ai_score": 94,
+        "best_time": 11,
+        "items_used": [
+            "None"
+        ]
+    },
+    "9": {
+        "completed": true,
+        "best_score": 177,
+        "best_ai_score": 87,
+        "best_time": 15,
+        "items_used": [
+            "None"
+        ]
+    },
+    "10": {
+        "completed": true,
+        "best_score": 192,
+        "best_ai_score": 86,
+        "best_time": 17,
+        "items_used": [
+            "None"
+        ]
+    },
+    "11": {
+        "completed": true,
+        "best_score": 146,
+        "best_ai_score": 0,
+        "best_time": 53,
+        "items_used": [
+            "None"
+        ]
+    }
+}
