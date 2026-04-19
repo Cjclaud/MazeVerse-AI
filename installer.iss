@@ -1,7 +1,7 @@
 #define MyAppName "Mazeverse AI"
-#define MyAppVersion "1.0.0"
+#define MyAppVersion "2.0.0"
 #define MyAppPublisher "Mazeverse"
-#define MyAppDevelopers "CJ (Munotida) & Paradise (Rutendo)"
+#define MyAppDevelopers "CJ (Munotida) & Paradise (Rutendo Gandi)"
 #define MyAppExeName "MazeverseAI.exe"
 
 [Setup]
@@ -15,7 +15,7 @@ DefaultDirName={autopf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
 DisableProgramGroupPage=yes
 OutputDir=installer-dist
-OutputBaseFilename=MazeverseAI-Setup
+OutputBaseFilename=MazeverseAI-Second-Edition-Setup
 SetupIconFile=assets\icon.ico
 WizardImageFile=assets\installer_wizard.png
 WizardSmallImageFile=assets\installer_small.png

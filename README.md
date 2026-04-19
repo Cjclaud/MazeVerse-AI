@@ -10,6 +10,7 @@ The project goes beyond a basic maze game. It generates new mazes, solves them w
 
 - Procedural maze generation with scaling challenge
 - `Solo` and `VS AI` game modes
+- Mobile Race mode with QR-code phone joining
 - BFS and A* pathfinding
 - Rival ghost AI with selectable difficulty
 - Adaptive hints and player performance evaluation
@@ -23,6 +24,8 @@ The project goes beyond a basic maze game. It generates new mazes, solves them w
 
 - Python
 - Pygame
+- Flask + Flask-SocketIO
+- qrcode
 - PyInstaller
 - Inno Setup
 
@@ -42,7 +45,7 @@ The project goes beyond a basic maze game. It generates new mazes, solves them w
 2. Install dependencies:
 
 ```powershell
-python -m pip install pygame pyinstaller
+python -m pip install -r requirements.txt
 ```
 
 3. Run the game:
@@ -71,4 +74,4 @@ The game stores progress, best scores, replays, and analytics as per-user data, 
 ## Authors
 
 - CJ (Munotida)
-- Paradise (Rutendo)
+- Paradise (Rutendo Gandi)

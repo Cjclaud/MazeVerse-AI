@@ -2,7 +2,14 @@
 
 from PyInstaller.utils.hooks import collect_submodules
 
-hiddenimports = collect_submodules("pygame")
+hiddenimports = (
+    collect_submodules("pygame")
+    + collect_submodules("flask")
+    + collect_submodules("flask_socketio")
+    + collect_submodules("socketio")
+    + collect_submodules("engineio")
+    + collect_submodules("qrcode")
+)
 
 a = Analysis(
     ['main.py'],
