@@ -73,5 +73,5 @@ The game stores progress, best scores, replays, and analytics as per-user data, 
 
 ## Authors
 
-- CJ (Munotida)
+- CJ (Munotida Madanhire)
 - Paradise (Rutendo Gandi)
