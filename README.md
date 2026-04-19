@@ -10,7 +10,7 @@ The project goes beyond a basic maze game. It generates new mazes, solves them w
 
 - Procedural maze generation with scaling challenge
 - `Solo` and `VS AI` game modes
-- Mobile Race mode with QR-code phone joining
+- Mobile Race mode with QR-code phone joining, maze completion, and a short quiz for the final score
 - BFS and A* pathfinding
 - Rival ghost AI with selectable difficulty
 - Adaptive hints and player performance evaluation
