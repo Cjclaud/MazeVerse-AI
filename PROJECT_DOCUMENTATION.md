@@ -6,7 +6,7 @@
 
 ## 2. Project Overview
 
-Mazeverse AI is a desktop maze game built with Python and Pygame. It combines procedural maze generation, pathfinding algorithms, adaptive gameplay assistance, replay tracking, and a competitive player-versus-AI mode.
+Mazeverse AI is a desktop maze game built with Python and Pygame. It combines procedural maze generation, pathfinding algorithms, adaptive gameplay assistance, replay tracking, a competitive player-versus-AI mode, and a QR-code Mobile Race mode.
 
 The project is designed to do more than let a player move through a maze. It studies how the player performs, reacts with adaptive support, records statistics, and gives the user a choice between a normal solo experience and a competitive race against an AI rival.
 
@@ -15,6 +15,7 @@ At a high level, the game supports:
 - Procedurally generated mazes that change in size and challenge as the player progresses
 - Solo mode for standard maze play
 - VS AI mode where the player races a rival ghost AI
+- Mobile Race mode where players join from a phone, complete a maze, and answer a short quiz for a final score
 - BFS and A* pathfinding demonstrations
 - Dynamic traps, power-ups, and checkpoints
 - Adaptive hint and assistance systems
@@ -43,7 +44,8 @@ The gameplay loop is:
 3. The game places the player, goal, and optional gameplay objects.
 4. The player moves through the maze while the game tracks time, moves, hints, and wrong turns.
 5. In VS AI mode, a rival AI ghost follows an optimal route and competes with the player.
-6. On completion, the game calculates rewards, updates records, stores analytics, and prepares the next level.
+6. In Mobile Race mode, players scan a QR code, join from a phone, complete a mobile maze, and answer quiz questions.
+7. On completion, the game calculates rewards, updates records, stores analytics, and prepares the next level.
 
 ## 5. Major Features
 
@@ -87,7 +89,23 @@ In VS AI mode:
 
 This gives the game both a relaxed puzzle mode and a competitive challenge mode.
 
-### 5.4 Adaptive Assistance
+### 5.4 Mobile Race and Quiz Mode
+
+The game includes a Mobile Race mode powered by `mobile_server.py`. From the desktop menu, the host can display a QR code that players scan with a phone on the same network.
+
+In this mode:
+
+- The desktop app starts a local Flask and Socket.IO server
+- Players join from their phone browser using the QR code link
+- The host can start the race from the desktop screen
+- Players complete a mobile maze using touch controls
+- After reaching the goal, players answer a short quiz
+- Race marks and quiz marks are combined into a final score out of 100
+- The winner and score are sent back to the desktop host screen
+
+This extends the game beyond single-device play and adds an educational quiz layer after maze completion.
+
+### 5.5 Adaptive Assistance
 
 The project contains an adaptive AI support layer in `ai_engine.py` and in the main game loop. The game studies how the player performs using factors such as:
 
@@ -107,7 +125,7 @@ The player is then classified into a simple performance profile:
 
 Based on that profile, the game can recommend easier or harder future conditions.
 
-### 5.5 Dynamic Hazards and Rewards
+### 5.6 Dynamic Hazards and Rewards
 
 The game includes special gameplay objects from `game_features.py`:
 
@@ -129,7 +147,7 @@ Power-up types include:
 
 These features increase tension and variety beyond simple movement through a maze.
 
-### 5.6 World Themes
+### 5.7 World Themes
 
 The game rotates between themed environments defined in `settings.py`:
 
@@ -146,7 +164,7 @@ Each theme changes visuals and lightly changes gameplay rules such as:
 - Power-up count
 - Rival ghost speed
 
-### 5.7 Tracking and Replay Systems
+### 5.8 Tracking and Replay Systems
 
 The game records advanced player behavior through:
 
@@ -159,7 +177,7 @@ The game records advanced player behavior through:
 
 This makes the project useful not only as a game, but also as an AI/gameplay analysis project.
 
-### 5.8 Desktop App Packaging
+### 5.9 Desktop App Packaging
 
 The project has been prepared for Windows desktop distribution using:
 
@@ -187,6 +205,7 @@ The system is modular. Each file has a clear responsibility.
 | `ai_engine.py` | Player profiling, adaptive recommendations, performance analysis |
 | `game_features.py` | Traps, power-ups, checkpoints, feature placement |
 | `main_menu.py` | Main menu interface |
+| `mobile_server.py` | Local Flask and Socket.IO server for Mobile Race phone joining, quiz flow, scoring, and winner broadcast |
 | `level_select.py` | Level selection screen and mode-specific stats view |
 | `settings_menu.py` | Settings UI |
 | `splash_screen.py` | Intro and splash experience |
@@ -204,6 +223,7 @@ The main game operates through several states:
 
 - Splash
 - Menu
+- Mobile Race
 - Playing
 - Paused
 - Won
@@ -218,6 +238,12 @@ flowchart TD
     C --> D[Select Solo or VS AI]
     C --> E[Open Settings]
     C --> F[Open Level Select]
+    C --> S[Open Mobile Race]
+    S --> T[Display QR Code]
+    T --> U[Players Join from Phone]
+    U --> V[Start Mobile Race]
+    V --> W[Mobile Maze and Quiz]
+    W --> X[Show Winner and Final Score]
     D --> G[Create Level]
     F --> G
     G --> H[Generate Maze]
@@ -368,6 +394,9 @@ The system supports the following functional behavior:
 - The game shall generate a valid maze for each new level.
 - The game shall allow the player to move cell by cell through the maze.
 - The game shall provide both Solo and VS AI modes.
+- The game shall provide a Mobile Race mode with QR-code phone joining.
+- The Mobile Race mode shall include maze completion followed by a short quiz.
+- The Mobile Race mode shall combine race marks and quiz marks into a final score.
 - The game shall support BFS and A* pathfinding.
 - The game shall provide hints based on AI-generated route data.
 - The game shall include traps, power-ups, and checkpoints.
@@ -396,11 +425,13 @@ The main user-facing screens are:
 - Pause overlay
 - Win overlay
 - Lose overlay
+- Mobile Race host screen with QR code, player roster, race controls, and results
 
 The menu allows the user to:
 
 - Start Solo mode
 - Start VS AI mode
+- Start Mobile Race mode
 - Select AI difficulty
 - Open level select
 - Open settings
@@ -436,12 +467,14 @@ The project can be deployed as a Windows desktop application.
 
 - `MazeverseAI.spec` builds the executable with PyInstaller
 - `installer.iss` builds the installer with Inno Setup
+- `requirements.txt` lists runtime and build dependencies, including Pygame, Flask, Flask-SocketIO, qrcode, and PyInstaller
 
 ### Deployment Behavior
 
 - The installed game includes its default images and sounds
 - The installer includes game branding
 - The application icon is configured
+- The Mobile Race dependencies are included in the PyInstaller build
 - Save files are stored per user
 - A fresh install on a new machine starts from the beginning
 
@@ -495,7 +528,7 @@ If you are writing a school, college, or project submission document, these sect
 
 ## 20. Short Formal Project Description
 
-Mazeverse AI is an adaptive maze-based desktop game developed in Python using Pygame. The system generates procedural mazes, applies AI pathfinding algorithms such as BFS and A*, and evaluates player behavior to provide adaptive support and competitive gameplay. The application includes Solo and VS AI modes, themed worlds, dynamic hazards, performance tracking, replay recording, and persistent progress management. The project demonstrates the integration of intelligent algorithms, interactive game design, and desktop software deployment within a single complete system.
+Mazeverse AI is an adaptive maze-based desktop game developed in Python using Pygame. The system generates procedural mazes, applies AI pathfinding algorithms such as BFS and A*, and evaluates player behavior to provide adaptive support and competitive gameplay. The application includes Solo, VS AI, and Mobile Race modes, themed worlds, dynamic hazards, performance tracking, replay recording, quiz-based mobile scoring, and persistent progress management. The project demonstrates the integration of intelligent algorithms, interactive game design, local mobile connectivity, and desktop software deployment within a single complete system.
 
 ## 21. Future Enhancement Ideas
 
@@ -509,4 +542,3 @@ Possible future improvements include:
 - Achievement systems
 - Expanded analytics dashboards
 - More visual accessibility settings
-
