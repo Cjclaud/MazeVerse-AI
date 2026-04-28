@@ -290,6 +290,12 @@ win_time = None
 qr_code_surface = None
 mobile_server_thread = None
 mobile_server_started = False
+mobile_theme_icons = {
+    "Neon Circuit": "NC",
+    "Frost Vault": "FV",
+    "Ember Core": "EC",
+    "Void Grid": "VG",
+}
 
 # -------------------------------------------------
 # ADAPTIVE HELP / HINT SYSTEM
@@ -2430,14 +2436,10 @@ while running:
                 mobile_race_url = f"http://{ip}:8000"
                 qr_code_surface = generate_qr_surface(mobile_race_url)
                 
-                # Reset server race state when entering
-                mobile_server.race_started = False
-                mobile_server.race_finished = False
-                mobile_server.winner = None
-                
                 if not mobile_server_started:
                     mobile_server.start_background_server()
                     mobile_server_started = True
+                mobile_server.open_new_session()
                 game_state = STATE_MOBILE_RACE
             elif action == "cycle_ai_difficulty":
                 menu_screen.runtime_settings = runtime_settings
@@ -2452,31 +2454,23 @@ while running:
 
         elif game_state == STATE_MOBILE_RACE:
             # Professional Layout Dimensions (Must match drawing code)
-            card_w, card_h = 800, 540
+            card_w, card_h = 800, 560
             card_x = (WIDTH - card_w) // 2
             card_y = (HEIGHT - card_h) // 2
             footer_y = card_y + card_h - 100
             
             start_btn_rect = pygame.Rect(card_x + 420, footer_y, 180, 55)
             back_btn_rect = pygame.Rect(card_x + 615, footer_y, 135, 55)
-            reset_btn_rect = pygame.Rect(card_x + 300, card_y + 400, 200, 50)
+            reset_btn_rect = pygame.Rect(card_x + 300, card_y + 480, 200, 50)
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     game_state = STATE_MENU
                 elif event.key == pygame.K_SPACE:
                     if len(mobile_server.players) > 0 and not mobile_server.race_started:
-                        mobile_server.race_started = True
-                        mobile_server.socketio.emit('race_start')
+                        mobile_server.start_race_session()
                 elif event.key == pygame.K_r and mobile_server.race_finished:
-                    # Reset race
-                    mobile_server.race_started = False
-                    mobile_server.race_finished = False
-                    mobile_server.winner = None
-                    for sid in list(mobile_server.players.keys()):
-                        mobile_server.players[sid]['taps'] = 0
-                        mobile_server.players[sid]['finished'] = False
-                    mobile_server.socketio.emit('player_update', len(mobile_server.players))
+                    mobile_server.open_new_session()
 
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 if back_btn_rect.collidepoint(event.pos):
@@ -2485,18 +2479,11 @@ while running:
                 if not mobile_server.race_started and not mobile_server.race_finished:
                     if start_btn_rect.collidepoint(event.pos):
                         if len(mobile_server.players) > 0:
-                            mobile_server.race_started = True
-                            mobile_server.socketio.emit('race_start')
+                            mobile_server.start_race_session()
                 
                 elif mobile_server.race_finished:
                     if reset_btn_rect.collidepoint(event.pos):
-                        mobile_server.race_started = False
-                        mobile_server.race_finished = False
-                        mobile_server.winner = None
-                        for sid in list(mobile_server.players.keys()):
-                            mobile_server.players[sid]['taps'] = 0
-                            mobile_server.players[sid]['finished'] = False
-                        mobile_server.socketio.emit('player_update', len(mobile_server.players))
+                        mobile_server.open_new_session()
 
         elif game_state == "settings":
             action = settings_screen.handle_event(event)
@@ -2763,6 +2750,13 @@ while running:
         header_y = card_y + 45
         draw_text("MOBILE GRID LINK", font_title, CYAN, card_x + 50, header_y)
         pygame.draw.line(screen, (30, 60, 100), (card_x + 50, header_y + 50), (card_x + card_w - 50, header_y + 50), 2)
+        theme_name = mobile_server.current_theme.get("name", "Neon Circuit")
+        theme_tag = mobile_theme_icons.get(theme_name, "MW")
+        theme_chip = pygame.Rect(card_x + 560, header_y - 2, 180, 36)
+        pygame.draw.rect(screen, (12, 24, 48), theme_chip, border_radius=18)
+        pygame.draw.rect(screen, CYAN, theme_chip, 1, border_radius=18)
+        draw_text(theme_tag, font_tiny, CYAN, theme_chip.x + 16, theme_chip.y + 10)
+        draw_text(theme_name, font_tiny, TEXT_COLOR, theme_chip.x + 50, theme_chip.y + 10)
         
         # Left Side: Connection (QR Code)
         qr_area_x = card_x + 50
@@ -2794,14 +2788,27 @@ while running:
         else:
             for i, p in enumerate(players_list[:10]):
                 name_y = roster_y + 45 + (i * 26)
-                pygame.draw.circle(screen, SUCCESS_COLOR, (roster_x + 20, name_y + 12), 5)
+                dot_color = SUCCESS_COLOR if p.get("finished") else CYAN
+                pygame.draw.circle(screen, dot_color, (roster_x + 20, name_y + 12), 5)
                 draw_text(p['name'], font_small, TEXT_COLOR, roster_x + 40, name_y)
+                if p.get("finished"):
+                    draw_text("DONE", font_tiny, SUCCESS_COLOR, roster_x + 240, name_y + 2)
+                elif p.get("ready_for_replay") and not mobile_server.race_started:
+                    draw_text("READY", font_tiny, CYAN, roster_x + 235, name_y + 2)
 
         # Footer Area: Status & Buttons
         footer_y = card_y + card_h - 100
+        active_count = len(mobile_server.active_race_sids)
+        finished_count = sum(1 for sid in mobile_server.active_race_sids if mobile_server.players.get(sid, {}).get("finished"))
         
         # Technical Readout
         draw_text(f"URL: {mobile_race_url}", font_tiny, TEXT_MUTED, card_x + 50, footer_y + 65)
+        if mobile_server.race_started and not mobile_server.race_finished:
+            draw_text(f"FINISHED: {finished_count}/{active_count}", font_tiny, CYAN, card_x + 420, footer_y - 28)
+        elif mobile_server.race_finished:
+            draw_text(f"FINALISTS: {len(mobile_server.race_results)}", font_tiny, SUCCESS_COLOR, card_x + 420, footer_y - 28)
+        else:
+            draw_text("HOST CAN OPEN A FRESH SESSION ANY TIME", font_tiny, TEXT_SUBCOLOR, card_x + 420, footer_y - 28)
         
         # Controls
         start_btn_rect = pygame.Rect(card_x + 420, footer_y, 180, 55)
@@ -2811,7 +2818,7 @@ while running:
         mx, my = pygame.mouse.get_pos()
         
         # START BUTTON
-        can_start = len(players_list) > 0 and not mobile_server.race_started
+        can_start = len(players_list) > 0 and not mobile_server.race_started and not mobile_server.race_finished
         start_color = CYAN if can_start else TEXT_MUTED
         if can_start and start_btn_rect.collidepoint((mx, my)):
             draw_glow_rect(start_btn_rect.x, start_btn_rect.y, start_btn_rect.w, start_btn_rect.h, CYAN, layers=4)
@@ -2838,26 +2845,38 @@ while running:
             
             w = mobile_server.winner
             winner_name = w.get('name', 'PILOT')
-            race_m = w.get('race_marks', 0)
-            quiz_m = w.get('quiz_marks', 0)
             total_m = w.get('total', 0)
+            winner_time = w.get('completion_time', '--')
             
-            draw_text("UPLINK COMPLETE", font_title, SUCCESS_COLOR, card_x + 240, card_y + 120)
-            draw_text(f"WINNER: {winner_name}", font_menu, WHITE, card_x + 250, card_y + 180)
-            
-            # Marks Breakdown
-            draw_text(f"Race Marks: {race_m}/50", font_text, TEXT_SUBCOLOR, card_x + 300, card_y + 230)
-            draw_text(f"Quiz Marks: {quiz_m}/50", font_text, TEXT_SUBCOLOR, card_x + 300, card_y + 270)
-            
-            # Total Score
-            draw_glow_rect(card_x + 280, card_y + 310, 240, 60, SUCCESS_COLOR, layers=3)
-            pygame.draw.rect(screen, (10, 30, 20), (card_x + 280, card_y + 310, 240, 60), border_radius=10)
-            draw_text(f"TOTAL: {total_m}/100", font_menu, SUCCESS_COLOR, card_x + 305, card_y + 325)
-            
-            draw_text("PRESS R TO RESET FOR NEW STUDENTS", font_tiny, WARNING_COLOR, card_x + 265, card_y + 400)
-            
+            draw_text("UPLINK COMPLETE", font_title, SUCCESS_COLOR, card_x + 240, card_y + 70)
+            draw_text(f"WINNER: {winner_name}", font_menu, WHITE, card_x + 250, card_y + 120)
+            draw_text(f"SCORE: {total_m}/100", font_text, SUCCESS_COLOR, card_x + 315, card_y + 165)
+            draw_text(f"TIME: {winner_time}", font_text, TEXT_SUBCOLOR, card_x + 328, card_y + 200)
+            draw_text(f"THEME: {theme_name}", font_tiny, CYAN, card_x + 327, card_y + 225)
+
+            table_x = card_x + 110
+            table_y = card_y + 250
+            table_w = 580
+            row_h = 34
+            pygame.draw.rect(screen, (8, 18, 36), (table_x, table_y, table_w, row_h * 7), border_radius=12)
+            pygame.draw.rect(screen, (20, 40, 80), (table_x, table_y, table_w, row_h * 7), 1, border_radius=12)
+
+            headers = [("RK", 18), ("PILOT", 82), ("SCORE", 295), ("TIME", 430)]
+            for header, x_offset in headers:
+                draw_text(header, font_tiny, CYAN, table_x + x_offset, table_y + 8)
+
+            for idx, result in enumerate(mobile_server.race_results[:6]):
+                row_y = table_y + row_h + (idx * row_h)
+                pygame.draw.line(screen, (24, 40, 70), (table_x + 10, row_y), (table_x + table_w - 10, row_y), 1)
+                draw_text(str(result.get("rank", idx + 1)), font_tiny, WHITE, table_x + 20, row_y + 8)
+                draw_text(result.get("name", "PILOT"), font_tiny, WHITE, table_x + 82, row_y + 8)
+                draw_text(f"{result.get('total', 0)}/100", font_tiny, WHITE, table_x + 295, row_y + 8)
+                draw_text(result.get("completion_time", "--"), font_tiny, WHITE, table_x + 430, row_y + 8)
+
+            draw_text("PRESS R TO OPEN A NEW SESSION", font_tiny, WARNING_COLOR, card_x + 280, card_y + 450)
+
             # Reset Button in Finish State
-            reset_btn_rect = pygame.Rect(card_x + 300, card_y + 440, 200, 50)
+            reset_btn_rect = pygame.Rect(card_x + 300, card_y + 480, 200, 50)
             if reset_btn_rect.collidepoint((mx, my)):
                 pygame.draw.rect(screen, (30, 80, 120), reset_btn_rect, border_radius=10)
             pygame.draw.rect(screen, CYAN, reset_btn_rect, 2, border_radius=10)

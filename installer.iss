@@ -1,5 +1,5 @@
 #define MyAppName "Mazeverse AI"
-#define MyAppVersion "2.0.0"
+#define MyAppVersion "2.5.0"
 #define MyAppPublisher "Mazeverse"
 #define MyAppDevelopers "CJ (Munotida) & Paradise (Rutendo Gandi)"
 #define MyAppExeName "MazeverseAI.exe"
