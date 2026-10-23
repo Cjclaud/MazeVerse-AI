@@ -212,7 +212,7 @@ The system is modular. Each file has a clear responsibility.
 | `progress_manager.py` | Level progress persistence |
 | `score_manager.py` | Best scores by difficulty |
 | `advanced_tracking.py` | Replay data, heatmaps, AI comparison |
-| `nalytics.py` / `analytics.py` | Session analytics and summary reporting |
+| `analytics.py` | Session analytics and summary reporting |
 | `app_paths.py` | Per-user data paths, asset resolution, user audio overrides |
 | `MazeverseAI.spec` | PyInstaller executable build definition |
 | `installer.iss` | Inno Setup installer configuration |

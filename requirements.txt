@@ -1,5 +1,8 @@
-pygame
-qrcode
-Flask
-Flask-SocketIO
-pyinstaller
+# Runtime
+pygame>=2.5,<3
+qrcode>=7.4,<9
+Flask>=3.0,<4
+Flask-SocketIO>=5.3,<6
+
+# Building the Windows desktop app only
+pyinstaller>=6.0,<7
